@@ -1,0 +1,3 @@
+"""
+Backtest application package.
+"""
