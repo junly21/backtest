@@ -2,30 +2,24 @@
 ETF 가격 데이터 수집 배치
 매일 미국 EST 18:00 (서머타임 미적용)에 실행됨
 """
-from app.core.constants import ETF_TICKERS
-from app.crawlers.yahoo_finance import fetch_etf_price
-from app.repositories.price_repository import PriceRepository
 from app.db.database import SessionLocal
+from app.services.price_service import PriceService
 
-def fetch_and_save_prices():
+def fetch_and_save_prices() -> None:
     """
     모든 ETF의 가격을 수집하여 DB에 저장
     """
     db = SessionLocal()
     try:
-        repository = PriceRepository(db)
+        service = PriceService(db)
+        results = service.update_etf_prices()
         
-        for ticker in ETF_TICKERS:
-            result = fetch_etf_price(ticker)
-            if result:
-                repository.save_price(
-                    ticker=ticker,
-                    price_date=result['date'],
-                    price=result['price']
-                )
-                print(f"Saved {ticker}: {result['date']} - ${result['price']:.2f}")
+        # 결과 출력
+        for result in results:
+            if result["success"]:
+                print(f"Saved {result['ticker']}: {result['date']} - ${result['price']:.2f}")
             else:
-                print(f"Failed to fetch price for {ticker}")
+                print(f"Failed to fetch {result['ticker']}: {result['error']}")
                 
     finally:
         db.close()
