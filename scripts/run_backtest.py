@@ -6,6 +6,7 @@ from app.models.backtest import BacktestInput
 from app.services.backtest_service import BacktestService
 from app.core.constants import DATABASE_URL
 
+
 def main():
     # DB 연결
     engine = create_engine(DATABASE_URL)
