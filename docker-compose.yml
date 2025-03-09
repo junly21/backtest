@@ -20,6 +20,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://backtest:backtest@db:5432/backtest
+      DB_HOST: db
     command: >
       bash -c "
         echo 'Waiting for PostgreSQL to start...' &&
@@ -27,8 +28,7 @@ services:
           sleep 1;
         done &&
         alembic upgrade head &&
-        python scripts/import_prices.py &&
-        python scripts/run_backtest.py &&
+        python scripts/import_prices.py data/prices.xlsx &&
         uvicorn app.main:app --host 0.0.0.0 --port 8000
       "
 
