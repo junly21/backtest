@@ -78,6 +78,9 @@ class BacktestService:
             (portfolio.nav / 1000.0) * input_data.initial_investment, 0
         )
         
+        # NAV 시계열 데이터 가져오기
+        nav_series = portfolio.get_nav_series()
+        
         return BacktestResult(
             total_return=stats.total_return,
             cagr=stats.cagr,
@@ -85,7 +88,10 @@ class BacktestService:
             sharpe_ratio=stats.sharpe_ratio,
             max_drawdown=stats.max_drawdown,
             last_weights=portfolio.get_last_weights(),
-            final_investment_value=final_investment_value
+            final_investment_value=final_investment_value,
+            nav_values=nav_series.values.tolist(),
+            nav_dates=[d.strftime("%Y-%m-%d") for d in nav_series.index],
+            weight_history=portfolio.get_weight_history()
         )
     
     def _load_price_data(self, start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:

@@ -2,7 +2,7 @@
 백테스트 관련 데이터 모델
 pydantic으로 setting과 validation
 """
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from pydantic import BaseModel, Field
 
 class BacktestInput(BaseModel):
@@ -22,4 +22,7 @@ class BacktestResult(BaseModel):
     sharpe_ratio: float = Field(..., description="샤프 지수")
     max_drawdown: float = Field(..., description="최대 손실폭")
     last_weights: List[Tuple[str, float]] = Field(..., description="마지막 리밸런싱 비중")
-    final_investment_value: float = Field(..., description="최종 투자금액") 
+    final_investment_value: float = Field(..., description="최종 투자금액")
+    nav_values: List[float] = Field(..., description="NAV 값 리스트")
+    nav_dates: List[str] = Field(..., description="NAV 날짜 리스트")
+    weight_history: List[Dict[str, float]] = Field(..., description="리밸런싱 비중 히스토리") 
