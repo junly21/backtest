@@ -78,8 +78,6 @@ backtest/
 │   ├── versions/         # 마이그레이션 버전 스크립트
 │   └── env.py            # Alembic 환경 설정
 └── tests/                # 테스트 코드
-    ├── api/              # API 엔드포인트 테스트
-    └── services/         # 비즈니스 로직 테스트
 ```
 
 ### 데이터베이스 스키마 변경
@@ -98,9 +96,7 @@ docker-compose exec app alembic upgrade head
 
 - **구현 위치**: `scripts/import_prices.py`
 - **주요 기능**:
-  - Excel 파일의 가격 데이터를 PostgreSQL DB에 적재
-  - 중복 데이터 처리 (merge 사용)
-  - 데이터 타입 검증 및 변환
+  - 스프레드 시트 내 가격 데이터를 price.xlsx로 분리하였고, 이를 PostgreSQL DB에 적재합니다.
 
 ### 2. 일일 가격 데이터 수집 배치
 
@@ -109,8 +105,8 @@ docker-compose exec app alembic upgrade head
   - 데이터 수집: `app/crawlers/`
   - 가격 저장: `app/services/price_service.py`
 - **주요 기능**:
-  - Yahoo Finance 데이터 수집
-  - DB 업데이트 및 로깅
+  - Yahoo Finance 데이터를 `data-testid='qsp-price'` 기준으로 수집합니다
+  - DB 업데이트
 
 ### 3. 백테스트 계산 로직
 
@@ -120,8 +116,9 @@ docker-compose exec app alembic upgrade head
     - `portfolio.py`: 포트폴리오 관리
     - `nav.py`: NAV 계산
     - `dates.py`: 거래일 관리
-  - 계산 유틸리티: `app/utils/calculations.py`
+  - 기타 계산 유틸리티: `app/utils/calculations.py`
 - **주요 기능**:
+  - 과제 스프레드 시트에 명세된 내용 및 계산식에 따라 아래 내용들을 처리합니다.
   - 모멘텀 기반 자산 선택
   - 리밸런싱 비중 계산
   - NAV 및 수수료 계산
