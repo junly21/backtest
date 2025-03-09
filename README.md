@@ -2,167 +2,136 @@
 
 ETF 모멘텀 전략을 백테스트하고 결과를 API로 제공하는 서비스입니다.
 
-## 1. 시작하기
-
-### 사전 요구사항
+## 🛠 기술 스택
 
 - Python 3.12
+- FastAPI
 - PostgreSQL
+- SQLAlchemy
+- Alembic
+- Docker
+- Docker Compose
 
-### Windows 사용자
+## 🚀 빠른 시작 (Docker)
 
-1단계: 백테스트 환경 설정 및 실행
-
-```bash
-# 파일 더블클릭으로 실행하거나
-.\setup_backtest.bat
-```
-
-2단계: API 서버 실행 및 테스트
+### 1. 환경 설정
 
 ```bash
-# 파일 더블클릭으로 실행하거나
-.\run_api_test.bat
+# 환경 변수 파일 생성
+cp .env.example .env
+# .env 파일을 필요에 따라 수정하세요
 ```
 
-### Mac/Linux 사용자
-
-1단계: 스크립트 실행 권한 부여
+### 2. 실행
 
 ```bash
-chmod +x setup_backtest.sh run_api_test.sh
+# Docker 컨테이너 실행
+docker-compose up --build
+
+# 또는 백그라운드에서 실행
+docker-compose up -d
 ```
 
-2단계: 백테스트 환경 설정 및 실행
+### 3. API 사용
+
+- API 문서 및 테스트: http://localhost:8000/docs#
+
+### 4. 데이터베이스 확인
 
 ```bash
-./setup_backtest.sh
+# PostgreSQL 접속
+docker-compose exec db psql -U backtest -d backtest
+
+# backtests 테이블 조회
+SELECT * FROM backtests;
 ```
 
-3단계: API 서버 실행 및 테스트
+### 5. 종료
 
 ```bash
-./run_api_test.sh
+# 컨테이너 종료 (백그라운드 실행 시)
+docker-compose down
+
+# 컨테이너와 볼륨 모두 제거
+docker-compose down -v
 ```
 
-각 단계는 다음 작업을 수행합니다:
-
-**백테스트 환경 설정 및 실행 (setup_backtest):**
-
-- 가상환경 설정
-- 필요한 패키지 설치
-- 데이터베이스 생성 및 초기화
-- 샘플 데이터 임포트
-- 백테스트 실행
-
-**API 서버 실행 및 테스트 (run_api_test):**
-
-- FastAPI 서버 실행
-- API 엔드포인트 테스트
-
-### API 문서
-
-서버 실행 후 다음 URL에서 API 문서를 확인할 수 있습니다:
-
-- Swagger UI: http://127.0.0.1:8000/docs
-- ReDoc: http://127.0.0.1:8000/redoc
-
-## 2. 데이터 준비
-
-1. `data/` 디렉토리에 가격 데이터가 포함된 엑셀 파일을 넣어주세요.
-
-   - 파일명: `prices.xlsx`
-   - 필수 컬럼: date, ticker, price
-   - 예시 데이터:
-     ```
-     date        ticker  price
-     2020-01-01  SPY     298.2208
-     ```
-
-2. 데이터베이스 생성
-
-```bash
-# PostgreSQL에 데이터베이스 생성
-createdb backtest
-```
-
-3. 데이터 임포트
-
-```bash
-# 엑셀 파일의 데이터를 DB에 임포트
-python scripts/import_prices.py data/prices.xlsx
-```
-
-## 초기 설정
-
-1. 가상환경 생성 및 활성화
-
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-.\venv\Scripts\activate   # Windows
-```
-
-2. 필요한 패키지 설치
-
-```bash
-pip install -r requirements.txt
-```
-
-3. PostgreSQL 데이터베이스 생성
-
-```sql
-CREATE DATABASE backtest;
-CREATE USER backtest WITH PASSWORD 'backtest';
-GRANT ALL PRIVILEGES ON DATABASE backtest TO backtest;
-```
-
-4. 데이터베이스 마이그레이션
-
-```bash
-# 마이그레이션 실행 (필수)
-alembic upgrade head
-```
-
-## 실행 방법
-
-1. FastAPI 서버 실행
-
-```bash
-uvicorn app.main:app --reload
-```
-
-2. API 테스트 실행
-
-```bash
-python scripts/test_api.py
-```
-
-## 데이터베이스 스키마 변경 시
-
-새로운 모델을 추가하거나 기존 모델을 수정할 경우:
-
-```bash
-# 새로운 마이그레이션 생성
-alembic revision --autogenerate -m "마이그레이션 설명"
-
-# 마이그레이션 적용
-alembic upgrade head
-
-# 마이그레이션 취소 (필요한 경우)
-alembic downgrade -1
-```
-
-## 프로젝트 구조
+## 📁 프로젝트 구조
 
 ```
 backtest/
-├── alembic/              # DB 마이그레이션 관련 파일
-├── app/
-│   ├── api/             # API 라우터
-│   ├── core/           # 핵심 설정 및 상수
-│   ├── db/             # 데이터베이스 모델 및 설정
-│   └── schemas/        # Pydantic 모델 (API 스키마)
-├── scripts/            # 유틸리티 스크립트
-└── tests/             # 테스트 코드
+├── app/                    # 애플리케이션 메인 디렉토리
+│   ├── api/               # API 라우터 및 엔드포인트
+│   ├── core/              # 설정, 상수, 공통 유틸리티
+│   ├── crawlers/          # 데이터 수집기
+│   ├── db/                # 데이터베이스 연결 및 세션 관리
+│   ├── models/            # SQLAlchemy 모델 정의
+│   ├── repositories/      # 데이터베이스 CRUD 작업 처리
+│   ├── schemas/           # Pydantic 모델 (요청/응답 스키마)
+│   ├── services/          # 비즈니스 로직 구현
+│   ├── trading/           # 트레이딩 관련 로직
+│   ├── utils/             # 유틸리티 함수
+│   ├── views/             # 데이터 표현 로직
+│   ├── main.py           # FastAPI 애플리케이션 진입점
+│   └── __init__.py       # 패키지 초기화
+├── alembic/               # 데이터베이스 마이그레이션
+│   ├── versions/         # 마이그레이션 버전 스크립트
+│   └── env.py            # Alembic 환경 설정
+└── tests/                # 테스트 코드
+    ├── api/              # API 엔드포인트 테스트
+    └── services/         # 비즈니스 로직 테스트
 ```
+
+### 데이터베이스 스키마 변경
+
+```bash
+# 새 마이그레이션 생성
+docker-compose exec app alembic revision --autogenerate -m "변경 설명"
+
+# 마이그레이션 적용
+docker-compose exec app alembic upgrade head
+```
+
+## 💡 주요 기능 구현
+
+### 1. 가격 데이터 초기 적재
+
+- **구현 위치**: `scripts/import_prices.py`
+- **주요 기능**:
+  - Excel 파일의 가격 데이터를 PostgreSQL DB에 적재
+  - 중복 데이터 처리 (merge 사용)
+  - 데이터 타입 검증 및 변환
+
+### 2. 일일 가격 데이터 수집 배치
+
+- **구현 위치**:
+  - 배치 실행: `batch/daily_fetch.py`
+  - 데이터 수집: `app/crawlers/`
+  - 가격 저장: `app/services/price_service.py`
+- **주요 기능**:
+  - Yahoo Finance 데이터 수집
+  - DB 업데이트 및 로깅
+
+### 3. 백테스트 계산 로직
+
+- **구현 위치**:
+  - 트레이딩 로직: `app/trading/`
+    - `strategy.py`: 모멘텀 전략 구현
+    - `portfolio.py`: 포트폴리오 관리
+    - `nav.py`: NAV 계산
+    - `dates.py`: 거래일 관리
+  - 계산 유틸리티: `app/utils/calculations.py`
+- **주요 기능**:
+  - 모멘텀 기반 자산 선택
+  - 리밸런싱 비중 계산
+  - NAV 및 수수료 계산
+  - 성과 지표 계산 (수익률, 변동성, 샤프 등)
+
+### 4. REST API 엔드포인트
+
+- **구현 위치**: `app/api/routes/`
+- **주요 기능**:
+  - 백테스트 실행 및 저장 (`POST /api/backtest/`)
+  - 백테스트 목록 조회 (`GET /api/backtest/`)
+  - 특정 백테스트 조회 (`GET /api/backtest/{data_id}`)
+  - 백테스트 삭제 (`DELETE /api/backtest/{data_id}`)
