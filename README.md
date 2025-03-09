@@ -135,3 +135,34 @@ docker-compose exec app alembic upgrade head
   - 백테스트 목록 조회 (`GET /api/backtest/`)
   - 특정 백테스트 조회 (`GET /api/backtest/{data_id}`)
   - 백테스트 삭제 (`DELETE /api/backtest/{data_id}`)
+
+## 테스트
+
+### 테스트 실행 방법
+
+Docker 환경에서 테스트를 실행하는 방법:
+
+```bash
+# 전체 테스트 실행
+docker-compose exec app pytest
+
+```
+
+#### 전략 테스트 (`tests/test_strategy.py`)
+
+1. **Risk-off 시나리오 테스트**
+
+   - TIP의 수익률이 음수일 때 전체 자산을 BIL로 배분
+   - 다른 자산(SPY, QQQ, GLD)의 비중은 0%가 되어야 함
+
+2. **Risk-on 시나리오 테스트** (개발 예정)
+   - TIP의 수익률이 양수일 때 모멘텀이 높은 상위 2개 자산에 각각 50% 배분
+   - BIL과 TIP의 비중은 0%가 되어야 함
+
+### 테스트 구조
+
+```
+tests/
+├── conftest.py        # pytest 공통 설정 및 fixture
+└── test_strategy.py   # 전략 관련 테스트
+```
